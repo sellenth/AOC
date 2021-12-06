@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "module": "esnext",
+      "moduleResolution": "node",
+      "outDir": "dist",
+      "rootDir": "./",
+        "esModuleInterop": true,
+      "target": "es2017"
+    },
+    "exclude": [
+      "dist",
+      "node_modules"
+    ]
+  }
