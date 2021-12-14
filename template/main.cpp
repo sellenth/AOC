@@ -1,13 +1,8 @@
 #include <iostream>
-#include <bitset>
 #include <string>
 #include <vector>
-#include <string.h>
 #include <fstream>
 #include <sstream>
-#include <unordered_map>
-#include <algorithm>
-#include <math.h>
 
 using namespace std;
 
