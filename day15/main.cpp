@@ -14,6 +14,7 @@ char FILENAME[] = "./ex.txt";
 char FILENAME[] = "./input.txt";
 #endif
 
+#define F(i, a, b) for(int i = a; i < b; i++)
 class Solution {
 
 public:
@@ -49,9 +50,11 @@ public:
     }
 
     void calcBestScores(){
-        for (int i = 1; i < map.size(); i++){
-            int x = 0;
-            for (int y = i; y >= 0; y--){
+        F(x, 0, map.size()){
+            F(y, 0, map[0].size()){
+                if (x == 0 && y == 0){
+                    continue;
+                }
                 if (x == 0){
                     bestScores[x][y] = bestScores[x][y-1] + map[x][y];
                 } else if (y == 0){
@@ -60,18 +63,8 @@ public:
                 else {
                     bestScores[x][y] = min(bestScores[x-1][y], bestScores[x][y-1]) + map[x][y];
                 }
-                x++;
             }
         }
-
-        for (int i = 1; i < map.size(); i++){
-            int y = map.size() - 1;
-            for (int x = i; x < map.size(); x++){
-                bestScores[x][y] = min(bestScores[x-1][y], bestScores[x][y-1]) + map[x][y];
-                y--;
-            }
-        }
-
     }
 
     bool validCoord(int x, int y){
