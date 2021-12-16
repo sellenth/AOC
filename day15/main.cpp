@@ -4,10 +4,11 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 
-#if 0
+#if 1
 char FILENAME[] = "./ex.txt";
 #else
 char FILENAME[] = "./input.txt";
@@ -36,14 +37,64 @@ public:
         }
     }
 
+    void printInOrder(){
+        for (int i = 0; i < map.size(); i++){
+            int x = 0;
+            for (int y = i; y >= 0; y--){
+                cout << map[x][y];
+                x++;
+            }
+            cout << endl;
+        }
+    }
+
+    void calcBestScores(){
+        for (int i = 1; i < map.size(); i++){
+            int x = 0;
+            for (int y = i; y >= 0; y--){
+                if (x == 0){
+                    bestScores[x][y] = bestScores[x][y-1] + map[x][y];
+                } else if (y == 0){
+                    bestScores[x][y] = bestScores[x-1][y] + map[x][y];
+                }
+                else {
+                    bestScores[x][y] = min(bestScores[x-1][y], bestScores[x][y-1]) + map[x][y];
+                }
+                x++;
+            }
+        }
+
+        for (int i = 1; i < map.size(); i++){
+            int y = map.size() - 1;
+            for (int x = i; x < map.size(); x++){
+                bestScores[x][y] = min(bestScores[x-1][y], bestScores[x][y-1]) + map[x][y];
+                y--;
+            }
+        }
+
+    }
+
     bool validCoord(int x, int y){
         return x >= 0 && x < map.size() && y >= 0 && y < map[0].size();
     }
 
+    void printBestScores(){
+        for (int i = 0; i < bestScores.size(); i++){
+            for (int j = 0; j < bestScores[0].size(); j++){
+                cout << bestScores[i][j] << ' ';
+            }
+            cout << endl;
+        }
+    }
+
 
     void solvePart1(){
-        bestScores = vector<vector<int>>(10, vector<int>(10, 0));
-        bestScores[0][1] = 4;
+        bestScores = vector<vector<int>>(map.size(), vector<int>(map[0].size(), 9));
+        bestScores[0][0] = 0;
+
+        calcBestScores();
+
+        printBestScores();
     }
 
     Solution() {
