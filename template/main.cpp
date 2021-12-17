@@ -12,6 +12,8 @@ char FILENAME[] = "./ex.txt";
 char FILENAME[] = "./input.txt";
 #endif
 
+#define F(i, a, b) for(int i = a; a < b; a++)
+
 class Solution {
 
 public:
