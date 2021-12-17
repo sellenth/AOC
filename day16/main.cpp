@@ -65,7 +65,9 @@ public:
         return c - 48 == 1;
     }
     
-    int binaryStringToInt(string s){
+    int binaryStringToInt(string &orig_str, int &i, int inc){
+        string s = orig_str.substr(i, inc);
+        i+= inc;
         int res = 0;
         int power = s.size() - 1;
         for(int i = 0; i < s.size(); i++){
@@ -82,19 +84,17 @@ public:
         for(int i = 0; i < words.size(); i++){
             wordsCat.append(words[i]);
         }
-        return binaryStringToInt(wordsCat);
+        int etc = 0;
+        return binaryStringToInt(wordsCat, etc, wordsCat.size());
     }
 
-    Packet parsePacket(string s, int &i){
+    Packet parsePacket(string s, int &i, bool align = true){
         Packet p;
-        p.version = binaryStringToInt(s.substr(i,3));
-        i+=3;
-        p.type = binaryStringToInt(s.substr(i,3));
-        i+=3;
+        p.version = binaryStringToInt(s, i, 3);
+        p.type = binaryStringToInt(s, i, 3);
         if (p.type == 4){ // This is a literal Packet
             while (i < s.size()){
-                int keepGoing = s[i] - 48;
-                i++;
+                int keepGoing = binaryStringToInt(s, i, 1);
                 if (keepGoing){
                     p.words.push_back(s.substr(i, 4));
                     i+=4;
@@ -105,31 +105,33 @@ public:
                 }
             }
         } else { //This is an operator packet
-            int pOp = s[i] - 48;
-            i++;
+            int pOp = binaryStringToInt(s, i, 1); 
             if (pOp == 0){ // totalLength
-                int length = binaryStringToInt(s.substr(i, 15));
-                i+=15;
+                int length = binaryStringToInt(s, i, 15);
                 int stopIdx = i + length;
 
                 while (i < stopIdx){
-                    int etc = 0;
-                    p.packets.push_back(parsePacket(s.substr(i, length), etc));
-                    i+=length + etc;
+                    p.packets.push_back(parsePacket(s, i, false));
                 }
             } else { // Number of following packets
-
+                int numSubPackets = binaryStringToInt(s, i, 11);
+                while (numSubPackets > 0){
+                    numSubPackets--;
+                    p.packets.push_back(parsePacket(s, i, false));
+                }
             }
         }
 
-        while (i % 4 != 0){ //remove the 0 padding
-            i++;
+        if (align){
+            while (i % 8 != 0){ //remove the 0 padding
+                i++;
+            }
         }
 
         return p;
     }
 
-    void solvePart1(){
+    void tests(){
         int i = 0;
         Packet L = parsePacket("110100101111111000101000", i);
         cout << i << endl;
@@ -140,12 +142,43 @@ public:
         i = 0;
         Packet twoPack = parsePacket("00111000000000000110111101000101001010010001001000000000", i);
         cout << i << endl;
+
         assert(twoPack.version == 1);
         assert(twoPack.type == 6);
+        assert(pWordsToInt(twoPack.packets[0].words) == 10);
+        assert(pWordsToInt(twoPack.packets[1].words) == 20);
+
+        i = 0;
+        Packet threePack = parsePacket("11101110000000001101010000001100100000100011000001100000", i);
+        cout << i << endl;
+
+        assert(threePack.version == 7);
+        assert(threePack.type == 3);
+        assert(pWordsToInt(threePack.packets[0].words) == 1);
+        assert(pWordsToInt(threePack.packets[1].words) == 2);
+        assert(pWordsToInt(threePack.packets[2].words) == 3);
+    }
+
+    int sumVersions(Packet p){
+        int sum = 0;
+        sum += p.version;
+
+        for (auto &subPacket : p.packets){
+            sum += sumVersions(subPacket);
+        }
+        return sum;
+    }
+
+    void solvePart1(){
+        int i = 0;
+        Packet p = parsePacket(input, i);
+
+        cout << sumVersions(p) << endl;
     }
 
     Solution() {
         parseInput();
+        //tests();
         solvePart1();
     }
 };
