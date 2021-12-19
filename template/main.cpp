@@ -14,6 +14,8 @@ char FILENAME[] = "./input.txt";
 
 #define F(i, a, b) for(int i = a; a < b; a++)
 
+typedef long long i64;
+
 class Solution {
 
 public:
