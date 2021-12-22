@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#if 1
+#if 0
 char FILENAME[] = "./ex.txt";
 #else
 char FILENAME[] = "./input.txt";
@@ -43,11 +43,14 @@ class Scanner {
     vector<vector<Point>> diffVectors;
     Point translation;
     bool oriented;
+    int translatedTo;
 
     Scanner(int n){
         num = n;
         points = {};
         oriented = false;
+        translation = {0, 0, 0};
+        translatedTo = n;
     }
 
     void calcAllDiffVectors(){
@@ -160,7 +163,6 @@ public:
         }
 
         scanners[0].oriented = true;
-        scanners[0].translation = {0, 0, 0};
     }
 
     double magnitude(Point v){
@@ -223,24 +225,22 @@ public:
 
 
     bool orientScanner(Scanner &s1, Scanner &s2, vector<diffVectMatch> &matches){
-        /*
-        for (int x = 0; x < 4; x++){
-            for (int y = 0; y < 3; y++){
-                for (int z = 0; z < 2; z++){
-                    s2.rotatePoints(1.571, 0, 0);
+        vector<Point> origPoints = s2.points;
+        for (int x = -4; x < 4; x++){
+            for (int y = -4; y < 4; y++){
+                for (int z = -4; z < 4; z++){
+                    s2.rotatePoints(1.571 * x, 1.571 * y, 1.571 * z);
                     s2.calcAllDiffVectors();
                     if (allMatch(s1, s2, matches)){
                         //printMatchList(s1, s2, matches);
                         //cout << s1.points[matches[0].baseVidx.first].x << s1.points[matches[0].baseVidx.first].y << s1.points[matches[0].baseVidx.first].z << endl;
                         return true;
                     }
+                    s2.points = origPoints;
                 }
             }
         }
     
-        return false;
-        */
-
         for (int x = 0; x < 4; x++){
             s2.rotatePoints(1.571, 0, 0);
             s2.calcAllDiffVectors();
@@ -261,46 +261,45 @@ public:
 
         s2.rotatePoints(0, 1.571, 0);
 
-        for (int z = 0; z < 4; z++){
-            s2.rotatePoints(0, 0, 1.571);
+        for (int x = 0; x < 4; x++){
+            s2.rotatePoints(1.571, 0, 0);
             s2.calcAllDiffVectors();
             if (allMatch(s1, s2, matches)){
                 return true;
             }
         }
 
-        s2.rotatePoints(3.1415, 0, 0);
+        s2.rotatePoints(0, 3.1415, 0);
 
-        for (int z = 0; z < 4; z++){
-            s2.rotatePoints(0, 0, 1.571);
+        for (int x = 0; x < 4; x++){
+            s2.rotatePoints(1.571, 0, 0);
             s2.calcAllDiffVectors();
             if (allMatch(s1, s2, matches)){
                 return true;
             }
         }
 
-        s2.rotatePoints(1.571, 0, 0);
+        s2.rotatePoints(1.571, 1.571, 0);
 
-        for (int y = 0; y < 4; y++){
-            s2.rotatePoints(0, 1.571, 0);
+        for (int x = 0; x < 4; x++){
+            s2.rotatePoints(1.571, 0, 0);
             s2.calcAllDiffVectors();
             if (allMatch(s1, s2, matches)){
                 return true;
             }
         }
 
-        s2.rotatePoints(3.1415, 0, 0);
+        s2.rotatePoints(0, 0, 3.1415);
 
-        for (int y = 0; y < 4; y++){
-            s2.rotatePoints(0, 1.571, 0);
+        for (int x = 0; x < 4; x++){
+            s2.rotatePoints(1.571, 0, 0);
             s2.calcAllDiffVectors();
             if (allMatch(s1, s2, matches)){
                 return true;
             }
-
         }
+
         return false;
-
     }
 
 
@@ -322,12 +321,13 @@ public:
             }
         } 
 
-        cout << "Highest point in scanner " << s1.num << " is " << pToStr(highestP1) << endl;
-        cout << "Highest point in scanner " << s2.num << " is " << pToStr(highestP2) << endl;
+        //cout << "Highest point in scanner " << s1.num << " is " << pToStr(highestP1) << endl;
+        //cout << "Highest point in scanner " << s2.num << " is " << pToStr(highestP2) << endl;
 
         Point translation = vectSub(highestP1, highestP2);
-        cout << "Translating scanner " << s2.num << " by " << pToStr(translation) << endl;
+        //cout << "Translating scanner " << s2.num << " by " << pToStr(translation) << endl;
         s2.translation = translation;
+        s2.translatedTo = s1.translatedTo;
         s2.translatePoints();
     }
 
@@ -371,9 +371,9 @@ public:
 
         for (int i = 0; i < scanners.size(); i++){
             for (int j = 0; j < scanners.size(); j++){
-                if (scanners[i].oriented && !scanners[j].oriented){
+                if (i != j){
                     vector<diffVectMatch> matches = getMatchList(scanners[i], scanners[j]);
-                    if (matches.size() >= 11){
+                    if (matches.size() >= 10){
                         if (orientScanner(scanners[i], scanners[j], matches)){
                             scanners[j].oriented = true;
                             vector<int> s1UniqueIndices = findUniqueIndices(0, matches);
@@ -386,6 +386,14 @@ public:
                         }
                     }
                 }
+            }
+        }
+
+        cout << endl << endl;
+
+        for (auto &s : scanners){
+            if (!s.oriented){
+                cout << "Scanner " << s.num << " couldn't find orientation" << endl;
             }
         }
 
