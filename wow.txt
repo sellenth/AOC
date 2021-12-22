@@ -1,0 +1,101 @@
+Scanner 2 has been oriented to scanner 0
+Highest point in scanner 0 is -908,-626,915
+Highest point in scanner 2 is 292,-567,787
+Translating scanner 2 by -1200,-59,128
+Scanner 3 has been oriented to scanner 0
+Highest point in scanner 0 is 653,-608,742
+Highest point in scanner 3 is -500,-420,617
+Translating scanner 3 by 1153,-188,125
+Scanner 4 has been oriented to scanner 0
+Highest point in scanner 0 is -908,-626,915
+Highest point in scanner 4 is -758,-630,-377
+Translating scanner 4 by -150,4,1292
+Scanner 18 has been oriented to scanner 0
+Highest point in scanner 0 is -878,-591,-260
+Highest point in scanner 18 is -862,-540,881
+Translating scanner 18 by -16,-51,-1141
+Scanner 27 has been oriented to scanner 0
+Highest point in scanner 0 is -908,-626,915
+Highest point in scanner 27 is -934,581,775
+Translating scanner 27 by 26,-1207,140
+Scanner 1 has been oriented to scanner 2
+Highest point in scanner 2 is -1769,499,940
+Highest point in scanner 1 is -519,502,-310
+Translating scanner 1 by -1250,-3,1250
+Scanner 9 has been oriented to scanner 2
+Highest point in scanner 2 is -878,-591,-260
+Highest point in scanner 9 is 450,-467,895
+Translating scanner 9 by -1328,-124,-1155
+Scanner 8 has been oriented to scanner 3
+Highest point in scanner 3 is 1938,-435,802
+Highest point in scanner 8 is 776,-287,-475
+Translating scanner 8 by 1162,-148,1277
+Scanner 6 has been oriented to scanner 4
+Highest point in scanner 4 is -561,-498,1939
+Highest point in scanner 6 is -560,-506,-573
+Translating scanner 6 by -1,8,2512
+Scanner 19 has been oriented to scanner 4
+Highest point in scanner 4 is -817,708,1844
+Highest point in scanner 19 is -665,-425,666
+Translating scanner 19 by -152,1133,1178
+Scanner 23 has been oriented to scanner 4
+Highest point in scanner 4 is -561,-498,1939
+Highest point in scanner 23 is -438,710,669
+Translating scanner 23 by -123,-1208,1270
+Scanner 12 couldn't be oriented to scanner 6
+Scanner 25 has been oriented to scanner 6
+Highest point in scanner 6 is -569,-969,3093
+Highest point in scanner 25 is -583,352,657
+Translating scanner 25 by 14,-1321,2436
+Scanner 12 has been oriented to scanner 8
+Highest point in scanner 8 is 1605,-646,1825
+Highest point in scanner 12 is 374,-562,-531
+Translating scanner 12 by 1231,-84,2356
+Scanner 16 has been oriented to scanner 8
+Highest point in scanner 8 is 1605,-646,1825
+Highest point in scanner 16 is 436,647,504
+Translating scanner 16 by 1169,-1293,1321
+Scanner 11 has been oriented to scanner 12
+Highest point in scanner 12 is 567,446,2890
+Highest point in scanner 11 is -514,-746,522
+Translating scanner 11 by 1081,1192,2368
+Scanner 15 has been oriented to scanner 12
+Highest point in scanner 12 is 1844,-667,3289
+Highest point in scanner 15 is 691,642,789
+Translating scanner 15 by 1153,-1309,2500
+Scanner 28 has been oriented to scanner 12
+Highest point in scanner 12 is 1844,-667,3289
+Highest point in scanner 28 is 681,-544,-380
+Translating scanner 28 by 1163,-123,3669
+Scanner 5 has been oriented to scanner 15
+Highest point in scanner 15 is 1844,-667,3289
+Highest point in scanner 5 is 790,557,-356
+Translating scanner 5 by 1054,-1224,3645
+Scanner 7 has been oriented to scanner 16
+Highest point in scanner 16 is 585,-1811,1988
+Highest point in scanner 7 is -449,607,671
+Translating scanner 7 by 1034,-2418,1317
+Scanner 20 has been oriented to scanner 16
+Highest point in scanner 16 is 1631,-1773,1984
+Highest point in scanner 20 is -682,-431,704
+Translating scanner 20 by 2313,-1342,1280
+Scanner 26 has been oriented to scanner 20
+Highest point in scanner 20 is 1631,-1773,1984
+Highest point in scanner 26 is -683,791,711
+Translating scanner 26 by 2314,-2564,1273
+Scanner 10 has been oriented to scanner 23
+Highest point in scanner 23 is 585,-1811,1988
+Highest point in scanner 10 is 614,667,753
+Translating scanner 10 by -29,-2478,1235
+Scanner 21 has been oriented to scanner 26
+Highest point in scanner 26 is 3049,-3044,2114
+Highest point in scanner 21 is -550,-542,778
+Translating scanner 21 by 3599,-2502,1336
+Scanner 17 has been oriented to scanner 27
+Highest point in scanner 27 is -517,-1974,845
+Highest point in scanner 17 is -541,454,877
+Translating scanner 17 by 24,-2428,-32
+Scanner 14 has been oriented to scanner 28
+Highest point in scanner 28 is 1992,587,4540
+Highest point in scanner 14 is 777,616,-362
+Translating scanner 14 by 1215,-29,4902
