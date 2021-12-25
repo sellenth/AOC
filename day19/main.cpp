@@ -260,109 +260,65 @@ public:
 
     bool orientScanner(Scanner &s1, Scanner &s2, vector<diffVectMatch> &matches){
         vector<vec3> orig_points = s2.points;
-        /*
-
-        [x, y, z]
-        [y, x, z]
-        [-y, x, z]
-        [x, -y, z]
-        
-        [x, y, -z]
-        [y, x, -z]
-        [-y, x, -z]
-        [x, -y, -z]
-        
-        [x, z, y]
-        [z, x, y]
-        [-z, x, y]
-        [x, -z, y]
-        
-        [x, z, -y]
-        [z, x, -y]
-        [-z, x, -y]
-        [x, -z, -y]
-
-        [z, y, x]
-        [y, z, x]
-        [-y, z, x]
-        [z, -y, x]
-        
-        [z, y, -x]
-        [y, z, -x]
-        [-y, z, -x]
-        [z, -y, -x]
-
 
         for (int i = 0; i < 24; i++){
             for (auto &p : s2.points){
-                vec3 newPoint(
-                    getCoorespondingComponent(i, X, p),
-                    getCoorespondingComponent(i, Y, p),
-                    getCoorespondingComponent(i, Z, p));
-                p = newPoint;
+
+                vec3 new_point;
+
+            switch (i / 4){
+                case 0: {
+                    // Unchanged
+                    new_point = vec3(p.x, p.y, p.z);
+                    break;
+                }
+                case 1: {
+                    // Rotate 180 degrees around the y-axis so z points towards -z
+                    new_point = vec3(-1 * p.x, p.y, -1 * p.z);
+                    break;
+                }
+                case 2: {
+                    // Rotate 90 degrees around the y-axis so that z points towards -x
+                    new_point = vec3(p.z, p.y, -1 * p.x);
+                    break;
+                }
+                case 3: {
+                    // Rotate 90 degrees around the y-axis so that z points towards +x
+                    new_point = vec3(-1 * p.z, p.y, p.x);
+                    break;
+                }
+                case 4: {
+                    // Rotate 90 degrees around the x-axis so that z points towards -y
+                    new_point = vec3(p.x, p.z, -1 * p.y);
+                    break;
+                }
+                case 5: {
+                    // Rotate 90 degrees around the x-axis so that z points towards +y
+                    new_point = vec3(p.x, -1 * p.z, p.y);
+                    break;
+                }
+                default: assert(0);
+                }
+
+            switch (i % 4){
+                case 0: {break;}
+                case 1: {new_point = vec3(-1 * new_point.y, new_point.x, new_point.z);} break;
+                case 2: {new_point = vec3(-1 * new_point.x, -1 * new_point.y, new_point.z);} break;
+                case 3: {new_point = vec3(new_point.y, -1 * new_point.x, new_point.z);} break;
+                default: assert(0);
             }
-        */
-        for (int i = 0; i < 6; i++){
-            for (int j = 0; j < 4; j++){
-                for (int k = 0; k < 2; k++){
-                    vector<int> possibles;
-                    int xComp, yComp, zComp;
-                    switch(i){
-                        case 0: case 1:
-                            xComp = i % 2 ? 1 : -1;
-                            possibles = {2, 3};
-                            break;
-                        case 2: case 3:
-                            xComp = i % 2 ? 2 : -2;
-                            possibles = {3, 1};
-                            break;
-                        case 4: case 5:
-                            xComp = i % 2 ? 3 : -3;
-                            possibles = {1, 2};
-                            break;
-                        default:
-                            break;
-                    }
 
-                    switch(j){
-                        case 0: case 1:
-                        {
-                            int val = possibles[0];
-                            possibles.erase(possibles.begin());
-                            yComp = j == 0 ? val * -1 : val;
-                        }
-                            break;
-                        case 2: case 3:
-                        {
-                            int val = possibles[1];
-                            possibles.erase(possibles.begin()+1);
-                            yComp = j == 2 ? val * -1 : val;
-                        }
-                            break;
-                        default:
-                            break;
-                    }
+            p = new_point;
 
-                    zComp = k == 0 ? possibles[0] * -1 : possibles[0];
-
-                    for (auto &p : s2.points){
-                        vec3 newPoint(
-                            getCoorespondingComponent(xComp, p),
-                            getCoorespondingComponent(yComp, p),
-                            getCoorespondingComponent(zComp, p));
-                        p = newPoint;
-                    }
+        }
+        
 
                     s2.calcAllDiffVectors();
                     if(allMatch(s1, s2, matches)){
                         return true;
                     }
                     s2.points = orig_points;
-
-                }
-            }
         }
-
 
 
         return false;
