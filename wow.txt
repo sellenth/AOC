@@ -1,24 +1,29 @@
-Scanner 2 has been oriented to scanner 0
-Scanner 3 has been oriented to scanner 0
-Scanner 4 has been oriented to scanner 0
-Scanner 18 has been oriented to scanner 0
-Scanner 27 has been oriented to scanner 0
-Scanner 1 has been oriented to scanner 2
-Scanner 9 has been oriented to scanner 2
-Scanner 8 has been oriented to scanner 3
-Scanner 23 has been oriented to scanner 4
-Scanner 12 has been oriented to scanner 8
-Scanner 16 has been oriented to scanner 8
-Scanner 6 has been oriented to scanner 12
-Scanner 11 has been oriented to scanner 12
-Scanner 15 has been oriented to scanner 12
-Scanner 28 has been oriented to scanner 12
-Scanner 5 has been oriented to scanner 15
-Scanner 25 has been oriented to scanner 15
-Scanner 7 has been oriented to scanner 16
-Scanner 20 has been oriented to scanner 16
-Scanner 26 has been oriented to scanner 20
-Scanner 10 has been oriented to scanner 23
-Scanner 21 has been oriented to scanner 26
-Scanner 17 has been oriented to scanner 27
-Scanner 14 has been oriented to scanner 28
+{{1, 2, 3},
+        {2, 1, 3},
+        {-2, 1, 3},
+        {1, -2, 3},
+        
+        {1, 2, -3},
+        {2, 1, -3},
+        {-2, 1, -3},
+        {1, -2, -3},
+        
+        {1, 3, 2},
+        {3, 1, 2},
+        {-3, 1, 2},
+        {1, -3, 2},
+        
+        {1, 3, -2},
+        {3, 1, -2},
+        {-3, 1, -2},
+        {1, -3, -2},
+
+        {3, 2, 1},
+        {2, 3, 1},
+        {-2, 3, 1},
+        {3, -2, 1},
+        
+        {3, 2, -1},
+        {2, 3, -1},
+        {-2, 3, -1},
+        {3, -2, -1}} 
