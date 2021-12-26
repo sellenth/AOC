@@ -6,15 +6,13 @@
 #include <cmath>
 #include <unordered_map>
 #include <algorithm>
-#include "./glm/glm.hpp"
-#include "./glm/gtx/rotate_vector.hpp"
-#include "./glm/gtc/constants.hpp"
-#include "./glm/gtc/epsilon.hpp"
+#include <cassert>
 
 using namespace std;
-using glm::vec3;
 
-#if 0
+#define TESTING 0
+
+#if TESTING
 char FILENAME[] = "./ex.txt";
 #else
 char FILENAME[] = "./input.txt";
@@ -22,60 +20,69 @@ char FILENAME[] = "./input.txt";
 
 #define F(i, a, b) for(int i = a; a < b; i++)
 
+
 typedef long long i64;
 
-enum COMPONENT {X = 1, Y = 2, Z = 3};
+class Point {
+    public:
+    i64 x, y, z;
+    Point(){
+        x = 0;
+        y = 0;
+        z = 0;
+    }
 
-int orientations[24][3] = {{1, 2, 3},
-    {2, 1, 3},
-    {-2, 1, 3},
-    {1, -2, 3},
+    Point(i64 a, i64 b, i64 c){
+        x = a;
+        y = b;
+        z = c;
+    }
 
-    {1, 2, -3},
-    {2, 1, -3},
-    {-2, 1, -3},
-    {1, -2, -3},
+    Point operator+(const Point& p2){
+        return Point(x + p2.x, y + p2.y, z + p2.z);
+    }
 
-    {1, 3, 2},
-    {3, 1, 2},
-    {-3, 1, 2},
-    {1, -3, 2},
+    Point operator-(const Point& p2){
+        return Point(x - p2.x, y - p2.y, z - p2.z);
+    }
 
-    {1, 3, -2},
-    {3, 1, -2},
-    {-3, 1, -2},
-    {1, -3, -2},
+    bool operator==(const Point& p2){
+        return x == p2.x && y == p2.y && z == p2.z;
+    }
 
-    {3, 2, 1},
-    {2, 3, 1},
-    {-2, 3, 1},
-    {3, -2, 1},
+    friend ostream& operator<<(ostream &os, const Point& p);
 
-    {3, 2, -1},
-    {2, 3, -1},
-    {-2, 3, -1},
-    {3, -2, -1}};      
+    string toString() const{
+        return to_string(x) + "," + to_string(y) + "," + to_string(z);
+    }
 
-string pToStr(vec3 v){
-    return to_string(int(v.x)) + "," + to_string(int(v.y)) + "," + to_string(int(v.z));
+    i64 magnitude(){
+        return pow(x, 2) + pow(y, 2) + pow(z, 2);
+    }
+};
+
+ostream& operator<<(ostream &os, const Point& p){
+    os << p.toString();
+    return os;
 }
+
+typedef Point vec3;
+vector<vec3> OFFSETS = {vec3(0, 0, 0)};
 
 class Scanner {
     public: 
     int num;
-    vector<vec3> points;
+    vector<Point> points;
     vector<vector<vec3>> diffVectors;
-    vec3 translation;
     bool oriented;
-    int translatedTo;
+    bool merged;
 
     Scanner(int n){
         num = n;
         points = {};
         diffVectors = {};
-        translation = {0, 0, 0};
         oriented = false;
-        translatedTo = n;
+        merged = false;
     }
 
     void calcAllDiffVectors(){
@@ -83,48 +90,16 @@ class Scanner {
         for (int i = 0; i < points.size(); i++){
             diffVectors.push_back(vector<vec3>(points.size()));
             for (int j = 0; j < points.size(); j++){
-                diffVectors[i][j] = differenceVector(points[i], points[j]);
+                diffVectors[i][j] = points[i] - points[j];
             }
         }
     }
 
-    vec3 differenceVector(vec3 p1, vec3 p2){
-        if (p1.z > p2.z){
-            return p1 - p2;
-        } else {
-            return p2 - p1;
-        }
-    }
-
-    void rotatePointsX(){
-        for (auto &p : points){
-            p = glm::vec3(p.x, p.z, -1 * p.y);
-        }
-    }
-
-    void rotatePointsY(){
-        for (auto &p : points){
-            p = glm::vec3(p.z, p.y, -1 * p.x);
-        }
-    }
-
-    void rotatePointsZ(){
-        for (auto &p : points){
-            p = glm::vec3(p.y, -1 * p.x, p.z);
-        }
-    }
-
-    void translatePoints(){
+    void translatePoints(vec3 translation){
         for (int i = 0; i < points.size(); i++){
             points[i] = points[i] + translation;
         }
     }
-
-};
-
-struct diffVectMatch {
-    pair<int, int> baseVidx;
-    pair<int, int> testVidx;
 };
 
 class Solution {
@@ -156,237 +131,134 @@ public:
             } else {
                 int firstComma = l.find(',');
                 int secondComma = l.find(',', firstComma + 1);
-                vec3 p;
+                Point p(0, 0, 0);
                 p.x = stoi(l.substr(0,firstComma));
                 p.y = stoi(l.substr(firstComma + 1, secondComma));
                 p.z = stoi(l.substr(secondComma + 1));
                 scanners.back().points.push_back(p);
             }
         }
-
-        scanners[0].oriented = true;
     }
 
+    Point getOrientation(Point &p, int i){
+        Point new_point(0, 0, 0);
 
-    void printMatchList(Scanner &s1, Scanner &s2, vector<diffVectMatch> &matches){
-        for (auto &match : matches){
-            vec3 v1 = s1.diffVectors[match.baseVidx.first][match.baseVidx.second];
-            vec3 v2 = s2.diffVectors[match.testVidx.first][match.testVidx.second];
-            if (glm::all(glm::epsilonEqual(v1, v2, FLT_EPSILON))){
-                cout << "Match" << endl;
-            } else {
-                cout << v1.x << " " << v1.y << " " << v1.z << endl;
-                cout << v2.x << " " << v2.y << " " << v2.z << endl << endl;
+        switch (i / 4){
+            case 0: {
+                // Unchanged
+                new_point = Point(p.x, p.y, p.z);
+                break;
             }
-        }
-    }
-
-    bool allMatch(Scanner &s1, Scanner &s2, vector<diffVectMatch> &matches){
-        for (auto &match : matches){
-            vec3 v1 = s1.diffVectors[match.baseVidx.first][match.baseVidx.second];
-            vec3 v2 = s2.diffVectors[match.testVidx.first][match.testVidx.second];
-            if (!glm::all(glm::epsilonEqual(v1, v2, FLT_EPSILON))){
-                return false;
+            case 1: {
+                // Rotate 180 degrees around the y-axis so z points towards -z
+                new_point = Point(-1 * p.x, p.y, -1 * p.z);
+                break;
             }
-        }
-        return true;
-    }
-
-    pair<int, int> findMatch(vec3 &diffVector, Scanner &s){
-        for (int i = 0; i < s.diffVectors.size(); i++){
-            for (int j = 0; j < s.diffVectors[0].size(); j++){
-                if (glm::epsilonEqual(glm::length(diffVector), glm::length(s.diffVectors[i][j]), FLT_EPSILON)){
-                    return make_pair(i, j);
-                }
+            case 2: {
+                // Rotate 90 degrees around the y-axis so that z points towards -x
+                new_point = Point(p.z, p.y, -1 * p.x);
+                break;
             }
-        }
-        return make_pair(-1, -1);
-    }
-
-    vector<diffVectMatch> getMatchList(Scanner &s1, Scanner &s2){
-        vector<diffVectMatch> matchList;
-        for (int i = 0; i < s1.diffVectors.size(); i++){
-            for (int j = i+1; j < s1.diffVectors[i].size(); j++){
-                pair<int, int> res = findMatch(s1.diffVectors[i][j], s2);
-                if (res.first != -1 && res.second != -1){
-                    diffVectMatch match = {make_pair(i,j), res};
-                    matchList.push_back(match);
-                    break;
-                }
+            case 3: {
+                // Rotate 90 degrees around the y-axis so that z points towards +x
+                new_point = Point(-1 * p.z, p.y, p.x);
+                break;
             }
-        }
-        return matchList;
-    }
-
-/*
-    float getCoorespondingComponent(int orientationIdx, COMPONENT c, vec3 &point){
-        switch(orientations[orientationIdx][c]){
-            case -1:
-                return point.x * -1.f;
-            case -2:
-                return point.y * -1.f;
-            case -3:
-                return point.z * -1.f;
-            case 1:
-                return point.x;
-            case 2:
-                return point.y;
-            case 3:
-                return point.z;
-            default:
-                return 0.f;
-        }
-    }
-    */
-
-    float getCoorespondingComponent(int v, vec3 &point){
-        switch(v){
-            case -1:
-                return point.x * -1.f;
-            case -2:
-                return point.y * -1.f;
-            case -3:
-                return point.z * -1.f;
-            case 1:
-                return point.x;
-            case 2:
-                return point.y;
-            case 3:
-                return point.z;
-            default:
-                return 0.f;
-        }
-    }
-
-    bool orientScanner(Scanner &s1, Scanner &s2, vector<diffVectMatch> &matches){
-        vector<vec3> orig_points = s2.points;
-
-        for (int i = 0; i < 24; i++){
-            for (auto &p : s2.points){
-
-                vec3 new_point;
-
-            switch (i / 4){
-                case 0: {
-                    // Unchanged
-                    new_point = vec3(p.x, p.y, p.z);
-                    break;
-                }
-                case 1: {
-                    // Rotate 180 degrees around the y-axis so z points towards -z
-                    new_point = vec3(-1 * p.x, p.y, -1 * p.z);
-                    break;
-                }
-                case 2: {
-                    // Rotate 90 degrees around the y-axis so that z points towards -x
-                    new_point = vec3(p.z, p.y, -1 * p.x);
-                    break;
-                }
-                case 3: {
-                    // Rotate 90 degrees around the y-axis so that z points towards +x
-                    new_point = vec3(-1 * p.z, p.y, p.x);
-                    break;
-                }
-                case 4: {
-                    // Rotate 90 degrees around the x-axis so that z points towards -y
-                    new_point = vec3(p.x, p.z, -1 * p.y);
-                    break;
-                }
-                case 5: {
-                    // Rotate 90 degrees around the x-axis so that z points towards +y
-                    new_point = vec3(p.x, -1 * p.z, p.y);
-                    break;
-                }
-                default: assert(0);
-                }
-
-            switch (i % 4){
-                case 0: {break;}
-                case 1: {new_point = vec3(-1 * new_point.y, new_point.x, new_point.z);} break;
-                case 2: {new_point = vec3(-1 * new_point.x, -1 * new_point.y, new_point.z);} break;
-                case 3: {new_point = vec3(new_point.y, -1 * new_point.x, new_point.z);} break;
-                default: assert(0);
+            case 4: {
+                // Rotate 90 degrees around the x-axis so that z points towards -y
+                new_point = Point(p.x, p.z, -1 * p.y);
+                break;
             }
-
-            p = new_point;
-
+            case 5: {
+                // Rotate 90 degrees around the x-axis so that z points towards +y
+                new_point = Point(p.x, -1 * p.z, p.y);
+                break;
+            }
+            default: assert(0);
         }
-        
 
-                    s2.calcAllDiffVectors();
-                    if(allMatch(s1, s2, matches)){
-                        return true;
+        switch (i % 4){
+            case 0: {break;}
+            case 1: {new_point = Point(-1 * new_point.y, new_point.x, new_point.z);} break;
+            case 2: {new_point = Point(-1 * new_point.x, -1 * new_point.y, new_point.z);} break;
+            case 3: {new_point = Point(new_point.y, -1 * new_point.x, new_point.z);} break;
+            default: assert(0);
+        }
+
+        return new_point;
+    }
+
+    bool twelveMatch(Scanner &s1, Scanner &s2, vec3 &translation){
+        int numMatch = 0;
+        for (int i = 0; i < s2.diffVectors.size(); i++){
+            for (int j = 0; j < s2.diffVectors[0].size(); j++){
+                if (i == j){
+                    continue;
+                }
+                for (int k = 0; k < s1.diffVectors.size(); k++){
+                    for (int m = 0; m < s1.diffVectors[0].size(); m++){
+                        if (k == m){
+                            continue;
+                        }
+                        if (s2.diffVectors[i][j] == s1.diffVectors[k][m]){
+                            numMatch++;
+                            if (numMatch >= 12){
+                                translation = s1.points[k] - s2.points[i];
+                                OFFSETS.push_back(translation);
+                                return true;
+                            }
+                        }
                     }
-                    s2.points = orig_points;
+                }
+            }
         }
-
-
         return false;
     }
 
-    void solveTranslation(Scanner &s1, vector<int> &s1u, Scanner &s2, vector<int> &s2u){
-        vec3 init = {-1, -1, -1};
-        vec3 highestP1 = {-1, -1, -1};
-        vec3 highestP2 = {-1, -1, -1};
+    bool orientScanner(Scanner &s1, Scanner &s2, vec3 &translation){
+        vector<Point> orig_points = s2.points;
 
-        for (auto &idx : s1u){
-            if (s1.points[idx].z > highestP1.z || highestP1 == init){
-                highestP1 = s1.points[idx];
+        for (int i = 0; i < 24; i++){
+            for (auto &p : s2.points){
+                p = getOrientation(p, i);
             }
-        } 
-
-        for (auto &idx : s2u){
-            if (s2.points[idx].z > highestP2.z || highestP2 == init){
-                highestP2 = s2.points[idx];
+        
+            s2.calcAllDiffVectors();
+            if(twelveMatch(s1, s2, translation)){
+                return true;
             }
-        } 
+            s2.points = orig_points;
+        }
+        return false;
+    }
 
-        cout << "Highest point in scanner " << s1.num << " is " << pToStr(highestP1) << endl;
-        cout << "Highest point in scanner " << s2.num << " is " << pToStr(highestP2) << endl;
+    void checkScannerPairs(){
+        for (int i = 0; i < scanners.size(); i++){
+            for (int j = i+1; j < scanners.size(); j++){
+                vec3 translation;
+                if (orientScanner(scanners[i], scanners[j], translation)){
+                    cout << "Scanner " << scanners[j].num << " has been oriented to scanner " << scanners[i].num << endl;
+                    scanners[j].translatePoints(translation);
+                    mergeScanner(scanners[i], scanners[j]);
+                    scanners.erase(scanners.begin() + j);
+                    return;
+                }
+            }
+        }
+    }
 
-        vec3 translation = highestP1 - highestP2;
-        cout << "Translating scanner " << s2.num << " by " << pToStr(translation) << endl;
-        s2.translation = translation;
-        s2.translatePoints();
-        s2.translatedTo = s1.translatedTo;
-
-        for (int i = 0; i < s2.points.size(); i++){
-            if (find(s2u.begin(), s2u.end(), i) == s2u.end()){
-                s1.points.push_back(s2.points[i]);
+    void mergeScanner(Scanner &s1, Scanner &s2){
+        unordered_map<string, int> coordsUsed = {};
+        for (auto &p : s1.points){
+            coordsUsed.emplace(p.toString(), 1);
+        }
+        for (auto &p : s2.points){
+            if (coordsUsed.count(p.toString()) == 0){
+                coordsUsed.emplace(p.toString(), 1);
+                s1.points.push_back(p);
             }
         }
         s1.calcAllDiffVectors();
-    }
-
-    vector<int> findUniqueIndices(int which, vector<diffVectMatch> &matches){
-        vector<int> uniques = {};
-        unordered_map<int, int> res = {};
-        for (int i = 0; i < matches.size(); i++){
-            if (which == 0){
-                res.emplace(matches[i].baseVidx.first, 1);
-                res.emplace(matches[i].baseVidx.second, 1);
-            } else {
-                res.emplace(matches[i].testVidx.first, 1);
-                res.emplace(matches[i].testVidx.second, 1);
-            }
-        }
-
-        for (auto &keyValue : res){
-            uniques.push_back(keyValue.first);
-        }
-
-        return uniques;
-    }
-
-    void countAllUniquePoints(){
-        unordered_map<string, int> uniques;
-        for (auto &s : scanners){
-            for (auto &p : s.points){
-                uniques.emplace(pToStr(p), 1);
-            }
-        }
-
-        cout << uniques.size() << endl;
     }
 
     void solvePart1(){
@@ -394,41 +266,58 @@ public:
             s.calcAllDiffVectors();
         }
 
-        Scanner& sZero = scanners[0];
-
         while (scanners.size() > 1){
-            for (int i = 1; i < scanners.size(); i++){
-                vector<diffVectMatch> matches = getMatchList(sZero, scanners[i]);
-                //printMatchList(sZero, scanners[i], matches);
-                if (matches.size() >= 5){
-                    if (orientScanner(sZero, scanners[i], matches)){
-                        scanners[i].oriented = true;
-                        vector<int> s1UniqueIndices = findUniqueIndices(0, matches);
-                        vector<int> s2UniqueIndices = findUniqueIndices(1, matches);
-                        cout << "Scanner " << scanners[i].num << " has been oriented to scanner " << sZero.num << endl;
+            checkScannerPairs();
+           cout << scanners[0].points.size() << endl;
+        }
 
-                        solveTranslation(sZero, s1UniqueIndices, scanners[i], s2UniqueIndices); 
-                        scanners.erase(scanners.begin() + i);
-                        break;
-                    } else {
-                        cout << "Scanner " << scanners[i].num << " couldn't be oriented to " << sZero.num << endl;
-                    }
-                } else {
-                    cout << "Scanner " << scanners[i].num << " only has " << matches.size() << " matches." << endl;
+        cout << scanners[0].points.size() << endl;
+
+    }
+
+    void testPart1(){
+        unordered_map<string, int> verify24 = {};
+        Point orig_point = scanners[0].points[0];
+        assert(orig_point == Point(-880, -557, 778));
+        for (int i = 0; i < 24; i++){
+            verify24.emplace(getOrientation(orig_point, i).toString(), 1);
+        }
+        verify24.emplace(getOrientation(orig_point, 0).toString(), 1);
+        assert(verify24.size() == 24);
+
+        assert(!(orig_point == Point()));
+        assert(orig_point - Point(1, 1, 1) == Point(-881, -558, 777));
+        scanners[0].translatePoints(vec3(1, 1, 1));
+        assert(orig_point + Point(1, 1, 1) == scanners[0].points[0]);
+        scanners[0].translatePoints(vec3(-1, -1, -1));
+        assert(scanners[0].points[0] == orig_point);
+
+        return;
+    }
+
+    i64 manhattanDistance(vec3 &v1, vec3 &v2){
+        return abs(v1.x - v2.x) + abs(v1.y - v2.y) + abs(v1.z - v2.z);
+    }
+
+    void solvePart2(){
+        i64 largest = 0;
+        for (int i = 0; i < OFFSETS.size(); i++){
+            for (int j = i+1; j < OFFSETS.size(); j++){
+                i64 d = manhattanDistance(OFFSETS[i], OFFSETS[j]);
+                if (d > largest){
+                    largest = d;
                 }
             }
         }
 
-
-        cout << scanners[0].points.size() << endl;
-        countAllUniquePoints();
-
-
+        cout << "Part2 answer: " << largest;
     }
 
     Solution() {
         parseInput();
+        //testPart1();
         solvePart1();
+        solvePart2();
     }
 };
 
